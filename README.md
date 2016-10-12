@@ -59,17 +59,16 @@ SMIMEA record for bilbo.baggins@theshire.com
 
 ## TLSA Utility
 
-The smimea-util go program generates an SMIMEA record from the following:
+The tlsa-util go program generates a TLSA record from the following:
 
 ```
-1) An Email Certificate  
-2) A user name  
-3) A user domain
+1) Fully qualitifed domain name, e. g. www.example.com
+2) A certificate for www.example.com
 ```
 
 The utility further allows any valid value for the usage, selector,
 and matching type fields to support the desired formating of the
-SMIMEA RDATA section.
+TLSA RDATA section.
 
 ### Usage
 ```
