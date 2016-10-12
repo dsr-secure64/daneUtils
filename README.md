@@ -10,7 +10,7 @@ miekg/dns go package. To build the file assumes the following branch:
 
 remotes/origin/smimea                  f13c21d Fix for miekg/dns issue #289: support the SMIMEA record
 
-Until such time as the SMIMEA patches are merged to master development branch.
+Until such time as the 'smimea' branch is merged to master.
 
 ## SMIMEA Utility
 
