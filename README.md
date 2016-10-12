@@ -1,7 +1,7 @@
 # DANE utilities
 
- * [smimeaUtil](#SMIMEA Utility)
- * [tlsaUtil](#TLSA Utility)
+ * [smimeaUtil](#smimea-utility)
+ * [tlsaUtil](#tlsa-utility)
 
 ## Build dependencies
 
