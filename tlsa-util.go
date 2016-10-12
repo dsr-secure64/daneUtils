@@ -10,8 +10,8 @@ import (
 	"os"
 )
 
-func printSMIMEArecord(userName string, userDomain string, certPEMfile string, usage int,
-	selector int, matchType int) error {
+func printTLSArecord(fqdnName string, certPEMfile string, usage int,
+	selector int, matchType int, network string, service string) error {
 	input_certificate, read_err := ioutil.ReadFile(certPEMfile)
 	if read_err != nil {
 		return read_err
@@ -24,44 +24,44 @@ func printSMIMEArecord(userName string, userDomain string, certPEMfile string, u
 		return fmt.Errorf("Error creating certificate\n")
 	}
 
-	common_name := userName + "@" + userDomain
+	common_name := fqdnName
 	if cert.Subject.CommonName != common_name {
 		return fmt.Errorf("Common Name mismatch\n")
 	}
 
-	smimea := new(dns.SMIMEA)
-	smime_dname, error := dns.SMIMEAName(userName, userDomain)
+	tlsa := new(dns.TLSA)
+	tlsa_dname, error := dns.TLSAName(fqdnName + ".", service, network)
 	if error != nil {
 		return error
 	} else {
-		fmt.Fprintf(os.Stdout, "SMIMEA name: %s\n", smime_dname)
+		fmt.Fprintf(os.Stdout, "TLSA name: %s\n", tlsa_dname)
 	}
 
-	smimea.Hdr.Name = smime_dname
-	smimea.Hdr = dns.RR_Header{Name: smimea.Hdr.Name, Rrtype: dns.TypeSMIMEA,
+	tlsa.Hdr.Name = tlsa_dname
+	tlsa.Hdr = dns.RR_Header{Name: tlsa.Hdr.Name, Rrtype: dns.TypeTLSA,
 		Class: dns.ClassINET, Ttl: 3600}
 
-	err := smimea.Sign(usage, selector, matchType, cert)
+	err := tlsa.Sign(usage, selector, matchType, cert)
 
 	if err != nil {
 		return err
 	} else {
-		fmt.Fprintf(os.Stdout, "SMIMEA record: %s\n", smimea.String())
+		fmt.Fprintf(os.Stdout, "TLSA record: %s\n", tlsa.String())
 	}
 
 	return nil
 }
-
 
 func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
 		flag.PrintDefaults()
 	}
-	
-	userNamePtr := flag.String("username", "", "email user name")
-	userDomainPtr := flag.String("userdomain", "", "email user domain association")
-	certFilePtr := flag.String("certPEMFile", "", "certificate file in PEM format")
+
+	fqdnPtr := flag.String("fqdn", "", "fully qualified domain name")
+	certFilePtr := flag.String("certPEMFile", "", "TLS certificate file iQn PEM format")
+	servicePtr := flag.String("service", "", "/etc/services defined application")
+	networkPtr := flag.String("network", "", "network protocol: tcp, udp")
 
 	usagePtr := flag.Int("usage", 0, "DANE certificate usage field")
 	selectorPtr := flag.Int("selector", 0, "DANE certificate selector field")
@@ -69,13 +69,13 @@ func main() {
 
 	flag.Parse()
 
-	if len(os.Args) < 6 {
+	if len(os.Args) < 7 {
 		flag.Usage()
 		os.Exit(1)
-	}	
+	}
 
-	err := printSMIMEArecord(*userNamePtr, *userDomainPtr, *certFilePtr, *usagePtr,
-		*selectorPtr, *matchTypePtr)
+	err := printTLSArecord(*fqdnPtr, *certFilePtr, *usagePtr, *selectorPtr,
+		*matchTypePtr, *networkPtr, *servicePtr)
 	if err != nil {
 		fmt.Fprintf(os.Stdout, "failed to create certificate: %v\n", err)
 	}
